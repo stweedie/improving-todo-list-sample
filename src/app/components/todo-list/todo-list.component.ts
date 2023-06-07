@@ -19,7 +19,6 @@ function getDateString(item: TodoItem): string {
 }
 
 function filterItems(item: TodoItem, text: string): boolean {
-  console.log("getDateString", getDateString(item), text);
   return item.description.toLocaleLowerCase().includes(text.toLocaleLowerCase())
     || item.priority.name.toLocaleLowerCase().includes(text.toLocaleLowerCase())
     || getDateString(item).includes(text.toLocaleLowerCase());
@@ -44,7 +43,7 @@ export class TodoListComponent {
   ngOnInit() {
     this.items$ = this.todoListService.getTodoItems();
 
-    this.data$ = combineLatest(this.items$, this.filterText$)
+    this.data$ = combineLatest([this.items$, this.filterText$])
       .pipe(
         map(([items, text]) => items.filter(item => filterItems(item, text)))
       );
