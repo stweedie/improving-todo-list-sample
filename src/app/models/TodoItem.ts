@@ -1,6 +1,8 @@
+import { type PriorityDescription } from "./PriorityDescription";
+
 export interface TodoItem {
-  id: number;
-  // todo: use enum / interface
-  priority: number;
+  completed: boolean;
+  priority: PriorityDescription;
+  dueDate: Date;
   description: string;
 }

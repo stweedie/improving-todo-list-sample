@@ -1,2 +1,2 @@
-export * from "./Priority";
+export * from "./PriorityDescription";
 export * from "./TodoItem";
