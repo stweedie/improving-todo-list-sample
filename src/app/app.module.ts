@@ -7,7 +7,7 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TodoListComponent } from './components/todo-list/todo-list.component';
 import { CreateTodoListItemComponent } from './components/create-todo-list-item/create-todo-list-item.component';
-import { TodoListService } from './services';
+import { TodoListService, TodoListStorageService, TodoListHttpService } from './services';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
@@ -25,7 +25,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     ReactiveFormsModule,
   ],
   providers: [
-    { provide: TodoListService, useValue: new TodoListService(localStorage) }
+    { provide: TodoListService, useValue: new TodoListStorageService(localStorage) }
+    // { provide: TodoListService, useClass: TodoListHttpService }
   ],
   bootstrap: [AppComponent]
 })

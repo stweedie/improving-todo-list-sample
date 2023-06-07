@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
 import { type TodoItem } from '~/models';
+import { TodoListService } from './todo-list-base.service';
 
 type TodoItemInStorage = Omit<TodoItem, "dueDate"> & {
   dueDate: string;
@@ -9,7 +10,7 @@ type TodoItemInStorage = Omit<TodoItem, "dueDate"> & {
 // this service uses local storage
 // can connect an HTTP implementation
 @Injectable()
-export class TodoListService {
+export class TodoListStorageService implements TodoListService {
   private namespace: string = "TODO_LIST";
 
   private itemSubject: Subject<TodoItem[]> = new BehaviorSubject([] as TodoItem[]);
