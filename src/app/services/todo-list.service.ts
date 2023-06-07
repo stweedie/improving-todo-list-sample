@@ -6,6 +6,8 @@ type TodoItemInStorage = Omit<TodoItem, "dueDate"> & {
   dueDate: string;
 };
 
+// this service uses local storage
+// can connect an HTTP implementation
 @Injectable()
 export class TodoListService {
   private namespace: string = "TODO_LIST";
@@ -36,6 +38,28 @@ export class TodoListService {
 
   getTodoItems(): Observable<TodoItem[]> {
     return this.itemSubject.asObservable();
+  }
+
+  toggleItem(item: TodoItem) {
+    const index = this.items.findIndex(ii => ii.description === item.description
+      && ii.priority.severity === item.priority.severity
+      && ii.dueDate === item.dueDate
+    );
+
+    this.items[index].completed = !this.items[index].completed;
+    this.syncStorage();
+    this.itemSubject.next(this.items);
+  }
+
+  removeItem(item: TodoItem) {
+    const index = this.items.findIndex(ii => ii.description === item.description
+      && ii.priority.severity === item.priority.severity
+      && ii.dueDate === item.dueDate
+    );
+
+    this.items.splice(index, 1);
+    this.syncStorage();
+    this.itemSubject.next(this.items);
   }
 
   addTodoItem(item: TodoItem): Observable<TodoItem[]> {
