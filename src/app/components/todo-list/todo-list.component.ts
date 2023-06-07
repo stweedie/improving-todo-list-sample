@@ -24,6 +24,15 @@ function filterItems(item: TodoItem, text: string): boolean {
     || getDateString(item).includes(text.toLocaleLowerCase());
 }
 
+function sortItems(left: TodoItem, right: TodoItem, sortDef: SortDefinition | null): number {
+  if (!sortDef) return -1;
+  const modifier = sortDef.direction === "asc" ? 1 : -1;
+
+  if (sortDef.column === "description") return modifier * left.description.localeCompare(right.description);
+  if (sortDef.column === "priority") return modifier * (left.priority.severity - right.priority.severity);
+  return modifier * ((left.dueDate?.valueOf() ?? 0) - (right.dueDate?.valueOf() ?? 0));
+}
+
 @Component({
   selector: 'tdl-todo-list',
   templateUrl: './todo-list.component.html',
@@ -32,10 +41,15 @@ function filterItems(item: TodoItem, text: string): boolean {
 export class TodoListComponent {
   items$: Observable<TodoItem[]> | undefined;
   filterText$: Subject<string> = new BehaviorSubject("");
-  //TODO: implement sorting logic
-  currentSort$: Subject<string | null> = new BehaviorSubject<string | null>(null);
+  currentSort$: Subject<SortDefinition | null> = new BehaviorSubject<SortDefinition | null>(null);
   data$: Observable<TodoItem[]> | undefined;
   currentText: string = "";
+
+  // hack: don't use a subject + property
+  // use a single subject
+  sortColumn: "description" | "priority" | "dueDate" | null = null;
+  sortDirection: "asc" | "desc" | null = null;
+
 
   constructor(private todoListService: TodoListService) {
   }
@@ -43,9 +57,12 @@ export class TodoListComponent {
   ngOnInit() {
     this.items$ = this.todoListService.getTodoItems();
 
-    this.data$ = combineLatest([this.items$, this.filterText$])
+    this.data$ = combineLatest([this.items$, this.filterText$, this.currentSort$])
       .pipe(
-        map(([items, text]) => items.filter(item => filterItems(item, text)))
+        map(([items, text, sort]) => items
+          .filter(item => filterItems(item, text))
+          .sort((l, r) => sortItems(l, r, sort))
+        )
       );
 
     // this.todoListService.addTodoItem({
@@ -88,5 +105,16 @@ export class TodoListComponent {
   }
 
   sort(column: "description" | "priority" | "dueDate") {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = "asc";
+    }
+
+    this.currentSort$.next({
+      column: this.sortColumn,
+      direction: this.sortDirection || "asc"
+    });
   }
 }
